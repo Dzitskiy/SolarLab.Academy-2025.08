@@ -1,4 +1,11 @@
+using AutoMapper;
+using SolarLab.Academy.AppServices.Repository;
+using SolarLab.Academy.AppServices.Services;
 using SolarLab.Academy.AppServices.WeatherForecast.Services;
+using SolarLab.Academy.DataAccess.Context.Repository;
+using SolarLab.Academy.DataAccess.MapProfile;
+using SolarLab.Academy.Infrastructure;
+using SolarLab.Academy.Infrastructure.Repository;
 
 namespace SolarLab.Academy.Api
 {
@@ -16,7 +23,18 @@ namespace SolarLab.Academy.Api
             builder.Services.AddSwaggerGen();
 
 
-            builder.Services.AddTransient<IWeatherForecastService, WeatherForecastService>();
+            //builder.Services.AddTransient<IWeatherForecastService, WeatherForecastService>();
+            var mapperConfiguration = new MapperConfiguration(config =>
+            {
+                config.AddProfile(new AdvertProfile());
+            });
+            builder.Services.AddSingleton(mapperConfiguration.CreateMapper());
+            builder.Services.AddDbContext<BoardDbContext>();
+            builder.Services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
+            builder.Services.AddTransient<IAdvertRepository, AdvertRepository>();
+            builder.Services.AddTransient<IAdvertService, AdvertService>();
+
+
 
 
             var app = builder.Build();

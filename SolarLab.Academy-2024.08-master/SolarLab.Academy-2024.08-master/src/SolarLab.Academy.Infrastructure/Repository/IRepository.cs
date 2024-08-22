@@ -12,7 +12,7 @@ namespace SolarLab.Academy.Infrastructure.Repository
         /// Возвращает все элементы сущности <see cref="TEntity"/>
         /// </summary>
         /// <returns>Все элементы сущности <see cref="TEntity"/></returns>
-        IQueryable<TEntity> GetAll();
+        Task<List<TEntity>> GetAll();
 
         //TODO
     }

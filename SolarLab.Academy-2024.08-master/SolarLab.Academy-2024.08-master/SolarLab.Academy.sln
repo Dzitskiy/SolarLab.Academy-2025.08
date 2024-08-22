@@ -33,7 +33,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SolarLab.Academy.Infrastruc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SolarLab.Academy.ComponentRegistrar", "src\SolarLab.Academy.ComponentRegistrar\SolarLab.Academy.ComponentRegistrar.csproj", "{546334E3-8016-4215-96BF-A556F990DEBF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolarLab.Academy.Tests", "tests\SolarLab.Academy.Tests\SolarLab.Academy.Tests.csproj", "{CFF8124C-4282-4DAA-B616-5664D9D266CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SolarLab.Academy.Tests", "tests\SolarLab.Academy.Tests\SolarLab.Academy.Tests.csproj", "{CFF8124C-4282-4DAA-B616-5664D9D266CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
