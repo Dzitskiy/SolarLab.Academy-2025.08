@@ -1,4 +1,5 @@
-﻿using Articles.AppServices.Contexts.Articles.Repository;
+﻿using Articles.AppServices.Contexts.Articles.Builder;
+using Articles.AppServices.Contexts.Articles.Repository;
 using Articles.AppServices.Contexts.Articles.Services;
 using Articles.Infrastructure.DataAccess.Contexts.Articles.Repositories;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +17,8 @@ public static class ComponentRegistrar
     
     public static IServiceCollection RegisterRepositories(this IServiceCollection services)
     {
-        services.AddScoped<IArticleRepository, ArticleRepository>();
+        services.AddTransient<IArticlePredicateBuilder, ArticlePredicateBuilder>();
+        services.AddSingleton<IArticleRepository, ArticleRepository>();
 
         return services;
     }
