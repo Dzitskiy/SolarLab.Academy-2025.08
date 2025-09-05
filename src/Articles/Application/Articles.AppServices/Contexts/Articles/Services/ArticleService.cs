@@ -1,8 +1,6 @@
 ﻿using Articles.AppServices.Contexts.Articles.Builder;
 using Articles.AppServices.Contexts.Articles.Repository;
 using Articles.Contracts.Articles;
-using Articles.Domain.Entities;
-using Microsoft.AspNetCore.Http;
 
 namespace Articles.AppServices.Contexts.Articles.Services;
 

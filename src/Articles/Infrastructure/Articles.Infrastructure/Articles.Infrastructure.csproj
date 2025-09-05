@@ -16,10 +16,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
       <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Application\Articles.AppServices\Articles.AppServices.csproj" />
       <ProjectReference Include="..\..\Contracts\Articles.Contracts\Articles.Contracts.csproj" />
     </ItemGroup>
 
