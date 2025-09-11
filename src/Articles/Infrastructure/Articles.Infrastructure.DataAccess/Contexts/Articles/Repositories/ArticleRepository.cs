@@ -3,11 +3,12 @@ using Articles.AppServices.Contexts.Articles.Repository;
 using Articles.AppServices.Specification;
 using Articles.Contracts.Articles;
 using Articles.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Articles.Infrastructure.DataAccess.Contexts.Articles.Repositories;
 
-public class ArticleRepository(ILogger<ArticleRepository> logger) : IArticleRepository
+public class ArticleRepository(ILogger<ArticleRepository> logger, ApplicationDbContext context) : IArticleRepository
 {
     private readonly ConcurrentDictionary<Guid, ArticleDto> _articles = new();
 
@@ -36,30 +37,50 @@ public class ArticleRepository(ILogger<ArticleRepository> logger) : IArticleRepo
         return Task.FromResult<IReadOnlyCollection<ArticleDto>>(result);
     }
 
-    public Task<ArticleDto> GetByIdAsync(Guid id)
+    public async Task<ArticleDto> GetByIdAsync(Guid id)
     {
+        var entity = await context.Articles.Include(s => s.User).FirstOrDefaultAsync(s => s.Id == id);
+
         _articles.TryGetValue(id, out var article);
         if (article is null)
         {
             logger.LogError("Запись с идентификатором: {id}", id);
-            return Task.FromResult(new ArticleDto());
+            return new ArticleDto();
         }
-        return Task.FromResult(article);
+        return article;
     }
 
-    public Task<ArticleDto> CreateAsync(CreateArticleDto article)
+    public async Task<ArticleDto> CreateAsync(CreateArticleDto article)
     {
+        var id = Guid.NewGuid();
         var articleDto = new ArticleDto
         {
-            Id = Guid.NewGuid(),
+            Id = id,
             Title = article.Title,
             Description = article.Description,
             CreatedAt = article.CreatedAt,
             UserName = article.UserName
         };
 
+        var entity = new Article
+        {
+            Id = id,
+            CreatedAt = article.CreatedAt,
+            Description = article.Description,
+            Title = article.Title,
+            User = new User
+            {
+                CreatedAt = article.CreatedAt,
+                Id = id,
+                FullName = article.UserName
+            }
+        };
+
+        await context.Articles.AddAsync(entity);
+        await context.SaveChangesAsync();
+
         _articles.TryAdd(articleDto.Id, articleDto);
-        return Task.FromResult(articleDto);
+        return articleDto;
     }
 
     public Task<ArticleDto> UpdateAsync(Guid id, CreateArticleDto article)
