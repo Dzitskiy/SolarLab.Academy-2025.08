@@ -72,7 +72,7 @@ public class ArticleRepository(ILogger<ArticleRepository> logger, ApplicationDbC
             {
                 CreatedAt = article.CreatedAt,
                 Id = id,
-                FullName = article.UserName
+                Name = article.UserName
             }
         };
 
