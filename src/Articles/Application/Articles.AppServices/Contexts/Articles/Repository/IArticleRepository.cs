@@ -9,7 +9,7 @@ public interface IArticleRepository
     Task<IReadOnlyCollection<ArticleDto>> GetByFilterAsync(ArticleFilterDto filter);
     Task<IReadOnlyCollection<ArticleDto>> FindAsync(Specification<ArticleDto> predicate);
     Task<ArticleDto> GetByIdAsync(Guid id);
-    Task<ArticleDto> CreateAsync(CreateArticleDto article);
+    Task<Guid> AddAsync(Article article);
     Task<ArticleDto> UpdateAsync(Guid id, CreateArticleDto article);
-    Task<bool> DeleteAsync(Guid id);
+    Task DeleteAsync(Guid id);
 }

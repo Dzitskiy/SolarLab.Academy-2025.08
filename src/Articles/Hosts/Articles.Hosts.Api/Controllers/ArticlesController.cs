@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Net;
 using Articles.AppServices.Contexts.Articles.Services;
 using Articles.Contracts.Articles;
 using Articles.Contracts.Errors;
@@ -39,16 +40,11 @@ public class ArticlesController(IArticleService articleService) : ControllerBase
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(ArticleDto), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateArticle(CreateArticleDto article)
     {
-        var articleDto = await articleService.CreateAsync(article);
-        if (articleDto == null)
-        {
-            return BadRequest();
-        }
-        return CreatedAtAction(nameof(GetArticleById), new { id = articleDto.Id }, articleDto);
+        var id = await articleService.CreateAsync(article);
+        return StatusCode((int)HttpStatusCode.Created, id);
     }
     
     [HttpPut("{id}")]
@@ -69,11 +65,7 @@ public class ArticlesController(IArticleService articleService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteArticle(Guid id)
     {
-        var articleDto = await articleService.DeleteAsync(id);
-        if (articleDto == false)
-        {
-            return BadRequest();
-        }
+        await articleService.DeleteAsync(id);
         return NoContent();
     }
 }

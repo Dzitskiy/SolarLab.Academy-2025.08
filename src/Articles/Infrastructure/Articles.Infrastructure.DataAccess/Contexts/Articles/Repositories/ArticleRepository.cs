@@ -3,13 +3,15 @@ using Articles.AppServices.Contexts.Articles.Repository;
 using Articles.AppServices.Specification;
 using Articles.Contracts.Articles;
 using Articles.Domain.Entities;
+using Articles.Infrastructure.DataAccess.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Articles.Infrastructure.DataAccess.Contexts.Articles.Repositories;
 
-public class ArticleRepository(ILogger<ArticleRepository> logger, ApplicationDbContext context) : IArticleRepository
+public class ArticleRepository(ILogger<ArticleRepository> logger, IRepository<Article, ApplicationDbContext> repository) : IArticleRepository
 {
+
     private readonly ConcurrentDictionary<Guid, ArticleDto> _articles = new();
 
     public Task<IReadOnlyCollection<ArticleDto>> GetByFilterAsync(ArticleFilterDto filter)
@@ -39,48 +41,24 @@ public class ArticleRepository(ILogger<ArticleRepository> logger, ApplicationDbC
 
     public async Task<ArticleDto> GetByIdAsync(Guid id)
     {
-        var entity = await context.Articles.Include(s => s.User).FirstOrDefaultAsync(s => s.Id == id);
+        var article = await repository.GetAll().Where(s => s.Id == id)
+            .Include(s => s.User)
+            .Select(s => new ArticleDto
+            {
+                Id = s.Id,
+                Title = s.Title,
+                CreatedAt = s.CreatedAt,
+                Description = s.Description,
+                UserName = s.User.Name
+            }).FirstOrDefaultAsync();
 
-        _articles.TryGetValue(id, out var article);
-        if (article is null)
-        {
-            logger.LogError("Запись с идентификатором: {id}", id);
-            return new ArticleDto();
-        }
         return article;
     }
 
-    public async Task<ArticleDto> CreateAsync(CreateArticleDto article)
-    {
-        var id = Guid.NewGuid();
-        var articleDto = new ArticleDto
-        {
-            Id = id,
-            Title = article.Title,
-            Description = article.Description,
-            CreatedAt = article.CreatedAt,
-            UserName = article.UserName
-        };
-
-        var entity = new Article
-        {
-            Id = id,
-            CreatedAt = article.CreatedAt,
-            Description = article.Description,
-            Title = article.Title,
-            User = new User
-            {
-                CreatedAt = article.CreatedAt,
-                Id = id,
-                Name = article.UserName
-            }
-        };
-
-        await context.Articles.AddAsync(entity);
-        await context.SaveChangesAsync();
-
-        _articles.TryAdd(articleDto.Id, articleDto);
-        return articleDto;
+    public async Task<Guid> AddAsync(Article article)
+    {        
+        await repository.AddAsync(article);
+        return article.Id;
     }
 
     public Task<ArticleDto> UpdateAsync(Guid id, CreateArticleDto article)
@@ -103,9 +81,8 @@ public class ArticleRepository(ILogger<ArticleRepository> logger, ApplicationDbC
         return Task.FromResult(updatedArticle);
     }
 
-    public Task<bool> DeleteAsync(Guid id)
+    public async Task DeleteAsync(Guid id)
     {
-        var result = _articles.TryRemove(id, out _);
-        return Task.FromResult(result);
+        await repository.DeleteAsync(id);
     }
 }
