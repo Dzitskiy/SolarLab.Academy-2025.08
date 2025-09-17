@@ -1,6 +1,7 @@
 ﻿using Articles.AppServices.Contexts.Articles.Builder;
 using Articles.AppServices.Contexts.Articles.Repository;
 using Articles.Contracts.Articles;
+using Articles.Domain.Entities;
 
 namespace Articles.AppServices.Contexts.Articles.Services;
 
@@ -20,9 +21,20 @@ public class ArticleService(IArticleRepository articleRepository, IArticlePredic
         return articleRepository.GetByIdAsync(id);
     }
 
-    public Task<ArticleDto> CreateAsync(CreateArticleDto article)
+    public Task<Guid> CreateAsync(CreateArticleDto article)
     {
-        return articleRepository.CreateAsync(article);
+        var entity = new Article
+        {
+            CreatedAt = article.CreatedAt,
+            Description = article.Description,
+            Title = article.Title,
+            User = new User
+            {
+                CreatedAt = article.CreatedAt,
+                Name = article.UserName
+            }
+        };
+        return articleRepository.AddAsync(entity);
     }
 
     public Task<ArticleDto> UpdateAsync(Guid id, CreateArticleDto article)
@@ -30,7 +42,7 @@ public class ArticleService(IArticleRepository articleRepository, IArticlePredic
         return articleRepository.UpdateAsync(id, article);
     }
 
-    public Task<bool> DeleteAsync(Guid id)
+    public Task DeleteAsync(Guid id)
     {
         return articleRepository.DeleteAsync(id);
     }
