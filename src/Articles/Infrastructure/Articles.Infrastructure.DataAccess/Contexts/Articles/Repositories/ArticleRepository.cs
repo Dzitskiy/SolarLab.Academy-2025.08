@@ -1,16 +1,19 @@
-﻿using System.Collections.Concurrent;
-using Articles.AppServices.Contexts.Articles.Repository;
+﻿using Articles.AppServices.Contexts.Articles.Repository;
 using Articles.AppServices.Specification;
 using Articles.Contracts.Articles;
 using Articles.Domain.Entities;
 using Articles.Infrastructure.DataAccess.Repositories;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 
 namespace Articles.Infrastructure.DataAccess.Contexts.Articles.Repositories;
 
-public class ArticleRepository(ILogger<ArticleRepository> logger, IRepository<Article, ApplicationDbContext> repository) : IArticleRepository
+public class ArticleRepository(ILogger<ArticleRepository> logger, IRepository<Article, ApplicationDbContext> repository, IMapper mapper) : IArticleRepository
 {
+
 
     private readonly ConcurrentDictionary<Guid, ArticleDto> _articles = new();
 
@@ -43,15 +46,8 @@ public class ArticleRepository(ILogger<ArticleRepository> logger, IRepository<Ar
     {
         var article = await repository.GetAll().Where(s => s.Id == id)
             .Include(s => s.User)
-            .Select(s => new ArticleDto
-            {
-                Id = s.Id,
-                Title = s.Title,
-                CreatedAt = s.CreatedAt,
-                Description = s.Description,
-                UserName = s.User.Name
-            }).FirstOrDefaultAsync();
-
+            .ProjectTo<ArticleDto>(mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync();
         return article;
     }
 

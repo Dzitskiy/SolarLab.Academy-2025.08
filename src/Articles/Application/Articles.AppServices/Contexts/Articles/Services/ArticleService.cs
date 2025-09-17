@@ -2,17 +2,19 @@
 using Articles.AppServices.Contexts.Articles.Repository;
 using Articles.Contracts.Articles;
 using Articles.Domain.Entities;
+using AutoMapper;
 
 namespace Articles.AppServices.Contexts.Articles.Services;
 
-public class ArticleService(IArticleRepository articleRepository, IArticlePredicateBuilder predicateBuilder) : IArticleService
+public class ArticleService(IArticleRepository articleRepository, IArticlePredicateBuilder predicateBuilder, IMapper mapper) : IArticleService
 {
+
     public Task<IReadOnlyCollection<ArticleDto>> GetByFilterAsync(ArticleFilterDto filter)
     {
         // пример применения строителя.
         var query = predicateBuilder.WithUsers().OrderByTitle().Build();
-        
-        
+
+
         return articleRepository.GetByFilterAsync(filter);
     }
 
@@ -23,17 +25,7 @@ public class ArticleService(IArticleRepository articleRepository, IArticlePredic
 
     public Task<Guid> CreateAsync(CreateArticleDto article)
     {
-        var entity = new Article
-        {
-            CreatedAt = article.CreatedAt,
-            Description = article.Description,
-            Title = article.Title,
-            User = new User
-            {
-                CreatedAt = article.CreatedAt,
-                Name = article.UserName
-            }
-        };
+        var entity = mapper.Map<CreateArticleDto, Article>(article);
         return articleRepository.AddAsync(entity);
     }
 
