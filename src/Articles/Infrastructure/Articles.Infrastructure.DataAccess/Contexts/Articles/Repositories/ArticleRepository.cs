@@ -8,77 +8,110 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
+using Articles.Contracts.Base;
 
 namespace Articles.Infrastructure.DataAccess.Contexts.Articles.Repositories;
 
-public class ArticleRepository(ILogger<ArticleRepository> logger, IRepository<Article, ApplicationDbContext> repository, IMapper mapper) : IArticleRepository
+/// <inheritdoc />
+public class ArticleRepository(
+    ILogger<ArticleRepository> logger,
+    IRepository<Article, ApplicationDbContext> repository,
+    IMapper mapper
+) : IArticleRepository
 {
-
-
-    private readonly ConcurrentDictionary<Guid, ArticleDto> _articles = new();
-
-    public Task<IReadOnlyCollection<ArticleDto>> GetByFilterAsync(ArticleFilterDto filter)
+    /// <inheritdoc />
+    public async Task<IReadOnlyCollection<ArticleDto>> GetByFilterAsync(
+        ArticleFilterDto filter,
+        CancellationToken cancellationToken
+    )
     {
-        var articles = _articles.Values.AsEnumerable();
+        var articles = repository.GetAll();
 
         if (!string.IsNullOrWhiteSpace(filter.Title))
         {
-            articles = articles.Where(a => a.Title.Contains(filter.Title, StringComparison.OrdinalIgnoreCase));
+            articles = articles.Where(a => a.Title.Contains(filter.Title));
         }
 
         if (!string.IsNullOrWhiteSpace(filter.UserName))
         {
-            articles = articles.Where(a => a.UserName.Contains(filter.UserName, StringComparison.OrdinalIgnoreCase));
+            articles = articles.Where(a => a.User.Name.Contains(filter.UserName));
         }
 
-        var result = articles.ToList().AsReadOnly();
-        return Task.FromResult<IReadOnlyCollection<ArticleDto>>(result);
+        return await articles
+            .ProjectTo<ArticleDto>(mapper.ConfigurationProvider)
+            .ToListAsync(cancellationToken);
     }
 
-    public Task<IReadOnlyCollection<ArticleDto>> FindAsync(Specification<ArticleDto> predicate)
+    /// <inheritdoc />
+    public async Task<PaginationCollection<ArticleDto>> FindAsync(Specification<Article> predicate,
+        int page,
+        int take,
+        CancellationToken cancellationToken)
     {
-        var articles = _articles.Values.ToList();
-        var result = articles.Where(predicate.ToExpression().Compile()).ToList().AsReadOnly();
-        return Task.FromResult<IReadOnlyCollection<ArticleDto>>(result);
+        var query = repository.GetAll().Where(predicate);
+        
+        var total = await query.CountAsync(cancellationToken);
+
+        var result = await query
+            .OrderBy(a => a.Id)
+            .Skip(take * (page - 1))
+            .Take(take)
+            .ProjectTo<ArticleDto>(mapper.ConfigurationProvider)
+            .ToArrayAsync(cancellationToken);
+
+        return new PaginationCollection<ArticleDto>
+        {
+            Items = result.AsReadOnly(),
+            Total = total,
+            AvailablePages = (int)double.Round((total / (double)take), MidpointRounding.ToPositiveInfinity) - page,
+        };
+
+        /*return await repository
+            .GetAll()
+            .Where(predicate)
+            .OrderBy(a => a.Id)
+            .Skip(page)
+            .Take(take)
+            .ProjectTo<ArticleDto>(mapper.ConfigurationProvider)
+            .ToListAsync(cancellationToken);*/
     }
 
-    public async Task<ArticleDto> GetByIdAsync(Guid id)
+    /// <inheritdoc />
+    public Task<ArticleDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        var article = await repository.GetAll().Where(s => s.Id == id)
+        return repository.GetAll().Where(s => s.Id == id)
             .Include(s => s.User)
             .ProjectTo<ArticleDto>(mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync();
-        return article;
+            .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<Guid> AddAsync(Article article)
+    /// <inheritdoc />
+    public async Task<Guid> AddAsync(Article article, CancellationToken cancellationToken)
     {        
-        await repository.AddAsync(article);
+        await repository.AddAsync(article, cancellationToken);
         return article.Id;
     }
 
-    public Task<ArticleDto> UpdateAsync(Guid id, CreateArticleDto article)
+    /// <inheritdoc />
+    public async Task<ArticleDto> UpdateAsync(Guid id, CreateArticleDto request, CancellationToken cancellationToken)
     {
-        if (!_articles.TryGetValue(id, out var existingArticle))
+        var article = await repository.GetByIdAsync(id, cancellationToken);
+
+        if (article is null)
         {
-            return Task.FromResult(new ArticleDto());
+            return new ArticleDto();
         }
 
-        var updatedArticle = new ArticleDto
-        {
-            Id = id,
-            Title = article.Title,
-            Description = article.Description,
-            CreatedAt = article.CreatedAt,
-            UserName = article.UserName
-        };
+        var updatedArticle = mapper.Map(request, article);
 
-        _articles.TryUpdate(id, updatedArticle, existingArticle);
-        return Task.FromResult(updatedArticle);
+        await repository.UpdateAsync(updatedArticle, cancellationToken);
+        return await GetByIdAsync(id, cancellationToken) 
+               ?? throw new ApplicationException($"Something went wrong. Updated article not found. Id: {id}");
     }
 
-    public async Task DeleteAsync(Guid id)
+    /// <inheritdoc />
+    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
-        await repository.DeleteAsync(id);
+        await repository.DeleteAsync(id, cancellationToken);
     }
 }

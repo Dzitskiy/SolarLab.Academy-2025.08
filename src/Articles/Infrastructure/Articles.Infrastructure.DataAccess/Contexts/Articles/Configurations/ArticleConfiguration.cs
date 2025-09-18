@@ -16,6 +16,8 @@ namespace Articles.Infrastructure.DataAccess.Contexts.Articles.Configurations
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Title).HasMaxLength(128).IsRequired();
             builder.Property(x => x.Description).HasMaxLength(128).IsRequired();
+            
+            builder.HasIndex(a => new { a.CreatedAt, a.Id }).IsUnique();
         }
     }
 }

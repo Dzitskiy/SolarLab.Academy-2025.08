@@ -48,7 +48,7 @@ namespace Articles.Hosts.DbMigrator.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Articles");
+                    b.ToTable("Articles", (string)null);
                 });
 
             modelBuilder.Entity("Articles.Domain.Entities.User", b =>
@@ -67,7 +67,7 @@ namespace Articles.Hosts.DbMigrator.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Articles.Domain.Entities.Article", b =>

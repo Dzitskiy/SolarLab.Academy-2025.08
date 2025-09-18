@@ -1,8 +1,25 @@
-﻿namespace Articles.Contracts.Articles;
+﻿using Articles.Contracts.Base;
 
-public class ArticleFilterDto
+namespace Articles.Contracts.Articles;
+
+/// <summary>
+/// Модель поиска статей по фильтру.
+/// </summary>
+public class ArticleFilterDto : IPagination
 {
-    public string Title { get; set; }
+    /// <summary>
+    /// Наименование статьи.
+    /// </summary>
+    public string? Title { get; set; }
     
-    public string UserName { get; set; }
+    /// <summary>
+    /// Имя автора.
+    /// </summary>
+    public string? UserName { get; set; }
+
+    /// <inheritdoc />
+    public int Page { get; set; }
+
+    /// <inheritdoc />
+    public int Take { get; set; }
 }
