@@ -1,9 +1,6 @@
-﻿using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Articles.Contracts.Files;
+using AutoMapper;
+using File = Articles.Domain.Entities.File;
 
 namespace Articles.Infrastructure.ComponentRegistrar.MapProfiles
 {
@@ -11,6 +8,13 @@ namespace Articles.Infrastructure.ComponentRegistrar.MapProfiles
     {
         public FileProfile()
         {
+            CreateMap<File, FileInfoDto>(MemberList.None);
+
+            CreateMap<File, FileDto>(MemberList.None);
+
+            CreateMap<FileDto, File>(MemberList.None)
+                .ForMember(s => s.Length, map => map.MapFrom(s => s.Content.Length))
+                .ForMember(s => s.CreatedAt, map => map.MapFrom(s => DateTime.UtcNow));
         }
     }
 }
