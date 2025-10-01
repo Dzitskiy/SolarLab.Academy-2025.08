@@ -29,7 +29,6 @@ namespace Articles.AppServices.Contexts.Files.Services
         public Task<Guid> UploadAsync(FileDto file, CancellationToken cancellationToken)
         {
             logger.LogInformation("Загружен файл \"{FileName}\", размер: {FileSize}кб", file.Name, file.Content.Length / 1024);
-            logger.LogInformation($"Загружен файл \"{file.Name}\", размер: {file.Content.Length / 1024}кб");
             var entity = mapper.Map<FileDto, File>(file);
             return repository.UploadAsync(entity, cancellationToken);
         }

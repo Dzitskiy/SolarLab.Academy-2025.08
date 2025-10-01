@@ -11,13 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddSerilog(conf => conf
     .ReadFrom.Configuration(builder.Configuration)
-    // .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-    // .Enrich.WithEnvironmentName()
-    // .Enrich.WithMachineName()
-    // .WriteTo.Elasticsearch(
-    //     nodeUris: "http://localhost:9200",
-    //     indexFormat: "articles-api-{0:yyyy.MM.dd}")
-    // .WriteTo.Console()
     );
 builder.Services.RegisterAppServices();
 builder.Services.RegisterRepositories();

@@ -22,18 +22,15 @@ public class ExceptionHandlingMiddleware
     {
         try
         {
-            using (_logger.BeginScope(new Dictionary<string, object> { ["LocalUserIp"] = context.Connection.LocalIpAddress }))
-            {
-                await _next(context);
-            }
+            await _next(context);
         }
         catch (Exception e)
         {
             using (_logger.BeginScope(new Dictionary<string, object> { ["UserIp"] = context.Connection.RemoteIpAddress.ToString() }))
             {
                 _logger.LogError(e, "Что-то пошло не так");
-                _logger.LogError(e, "Что-то пошло не так2");
             }
+
             await HandleExceptionAsync(context, e);
         }
     }
@@ -43,7 +40,7 @@ public class ExceptionHandlingMiddleware
         context.Response.ContentType = "application/json";
         var errorModel = MapError(exception, context);
         context.Response.StatusCode = errorModel.Item1;
-        
+
         return context.Response.WriteAsync(JsonConvert.SerializeObject(errorModel.Item2));
     }
 
@@ -56,7 +53,7 @@ public class ExceptionHandlingMiddleware
                 Message = $"Сущность с идентификатором {e.Id} не была найдена.",
                 TraceId = context.TraceIdentifier
             }),
-            
+
             _ => (StatusCodes.Status500InternalServerError, new ErrorDto
             {
                 StatusCode = StatusCodes.Status500InternalServerError,
