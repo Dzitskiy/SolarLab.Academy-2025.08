@@ -1,4 +1,6 @@
-﻿using Articles.Contracts.Errors;
+﻿using System.Net;
+using Articles.AppServices.Exceptions;
+using Articles.Contracts.Errors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -24,7 +26,11 @@ public class ExceptionHandlingMiddleware
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Что-то пошло не так");
+            using (_logger.BeginScope(new Dictionary<string, object> { ["UserIp"] = context.Connection.RemoteIpAddress.ToString() }))
+            {
+                _logger.LogError(e, "Что-то пошло не так");
+            }
+
             await HandleExceptionAsync(context, e);
         }
     }
@@ -32,15 +38,27 @@ public class ExceptionHandlingMiddleware
     private static Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
         context.Response.ContentType = "application/json";
-        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        var errorModel = MapError(exception, context);
+        context.Response.StatusCode = errorModel.Item1;
 
-        var response = new ErrorDto
-        {
-            StatusCode = context.Response.StatusCode,
-            Message = "Что-то пошло не так. Попробуйте позже.",
-            TraceId = context.TraceIdentifier
-        };
-        
-        return context.Response.WriteAsync(JsonConvert.SerializeObject(response));
+        return context.Response.WriteAsync(JsonConvert.SerializeObject(errorModel.Item2));
     }
+
+    private static (int, ErrorDto) MapError(Exception exception, HttpContext context) =>
+        exception switch
+        {
+            NotFoundException e => (StatusCodes.Status404NotFound, new ErrorDto
+            {
+                StatusCode = StatusCodes.Status404NotFound,
+                Message = $"Сущность с идентификатором {e.Id} не была найдена.",
+                TraceId = context.TraceIdentifier
+            }),
+
+            _ => (StatusCodes.Status500InternalServerError, new ErrorDto
+            {
+                StatusCode = StatusCodes.Status500InternalServerError,
+                Message = "Что-то пошло не так.",
+                TraceId = context.TraceIdentifier
+            }),
+        };
 }

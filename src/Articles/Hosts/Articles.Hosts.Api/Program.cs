@@ -2,10 +2,16 @@ using Articles.Infrastructure.ComponentRegistrar;
 using Articles.Infrastructure.DataAccess;
 using Articles.Infrastructure.Middlewares;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Events;
+using Serilog.Sinks.Elasticsearch;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddSerilog(conf => conf
+    .ReadFrom.Configuration(builder.Configuration)
+    );
 builder.Services.RegisterAppServices();
 builder.Services.RegisterRepositories();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("ConnectionString")));
