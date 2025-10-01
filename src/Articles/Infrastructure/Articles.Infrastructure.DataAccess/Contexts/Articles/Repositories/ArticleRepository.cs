@@ -8,6 +8,7 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
+using Articles.AppServices.Exceptions;
 using Articles.Contracts.Base;
 
 namespace Articles.Infrastructure.DataAccess.Contexts.Articles.Repositories;
@@ -77,12 +78,19 @@ public class ArticleRepository(
     }
 
     /// <inheritdoc />
-    public Task<ArticleDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<ArticleDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return repository.GetAll().Where(s => s.Id == id)
+        var result = await repository.GetAll().Where(s => s.Id == id)
             .Include(s => s.User)
             .ProjectTo<ArticleDto>(mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(cancellationToken);
+
+        if (result is null)
+        {
+            throw new NotFoundException(id.ToString());
+        }
+
+        return result;
     }
 
     /// <inheritdoc />
@@ -106,7 +114,7 @@ public class ArticleRepository(
 
         await repository.UpdateAsync(updatedArticle, cancellationToken);
         return await GetByIdAsync(id, cancellationToken) 
-               ?? throw new ApplicationException($"Something went wrong. Updated article not found. Id: {id}");
+               ?? throw new NotFoundException(id.ToString());
     }
 
     /// <inheritdoc />
