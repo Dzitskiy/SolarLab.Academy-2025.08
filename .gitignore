@@ -499,3 +499,12 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 .idea/
+
+# Ignore code coverage tools
+lcov.info
+coverage/
+coverage-hits/
+coverage.json
+.config/dotnet-tools.json
+opencovercoverage.xml
+coverage-html/

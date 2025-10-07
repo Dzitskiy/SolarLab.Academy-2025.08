@@ -8,7 +8,10 @@ namespace Articles.Infrastructure.ComponentRegistrar.MapProfiles
     {
         public ArticleProfile()
         {
-            CreateMap<CreateArticleDto, Article>(MemberList.None)
+            CreateMap<CreateArticleDto, Article>()
+                .ForMember(s => s.Id, map => map.Ignore())
+                .ForMember(s => s.User, map => map.Ignore())
+                .ForMember(s => s.UserId, map => map.Ignore())
                 .ForMember(s => s.CreatedAt, map => map.MapFrom(s => DateTime.UtcNow))
                 .ForMember(s => s.User, map => map.MapFrom(s => s));
 

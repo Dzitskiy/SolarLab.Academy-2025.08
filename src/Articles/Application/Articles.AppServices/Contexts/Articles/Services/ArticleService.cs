@@ -46,6 +46,7 @@ public class ArticleService(
     public Task<Guid> CreateAsync(CreateArticleDto article, CancellationToken cancellationToken)
     {
         var entity = mapper.Map<CreateArticleDto, Article>(article);
+        entity.Id = Guid.NewGuid();
         return articleRepository.AddAsync(entity, cancellationToken);
     }
 
