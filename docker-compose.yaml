@@ -1,0 +1,41 @@
+﻿services:
+
+  # articles.hosts.api:
+  #   image: articles.hosts.api
+  #   build:
+  #     context: .
+  #     dockerfile: src/Articles/Hosts/Articles.Hosts.Api/Dockerfile
+  #   ports:
+  #     - "5001:8080"
+  #   networks:
+  #     - articles-network
+      
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      PGDATA: /data/postgres
+    volumes:
+      - postgres_data:/data/postgres
+    networks:
+      - articles-network
+  
+  redis:
+    container_name: redis
+    image: redis:latest
+    restart: always
+    ports:
+      - 6379:6379
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - articles-network
+
+
+
+volumes:
+  postgres_data:
+
+networks:
+  articles-network:
