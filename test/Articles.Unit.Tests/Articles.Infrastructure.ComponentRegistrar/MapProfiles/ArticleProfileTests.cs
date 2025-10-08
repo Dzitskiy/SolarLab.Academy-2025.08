@@ -35,10 +35,10 @@ public class ArticleProfileTests
     }
 
     /// <summary>
-    /// Проверка <see cref="AdvertProfile"/>.
+    /// Проверка <see cref="ArticleProfile"/>.
     /// </summary>
     [Fact]
-    public void AdvertProfile_CreateAdvertRequest_To_Advert()
+    public void ArticleProfile_Check()
     {
         // Arrange
         var title = Fixture.Create<string>();
@@ -60,5 +60,55 @@ public class ArticleProfileTests
         result.Id.Should().Be(Guid.Empty);
         result.Title.Should().Be(title);
         result.Description.Should().Be(description);
+    }
+
+    /// <summary>
+    /// Проверка <see cref="ArticleProfile"/>.
+    /// </summary>
+    [Fact]
+    public void ArticleProfile_Check_User()
+    {
+        // Arrange
+        var userName = Fixture.Create<string>();
+
+        var source = Fixture
+            .Build<CreateArticleDto>()
+            .OmitAutoProperties()
+            .With(x => x.UserName, userName)
+            .Create();
+
+        // Act
+        var result = Mapper.Map<CreateArticleDto, User>(source);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.ShouldBeOfType<User>();
+        result.Id.Should().Be(Guid.Empty);
+        result.Name.Should().Be(userName);
+    }
+
+    /// <summary>
+    /// Проверка <see cref="ArticleProfile"/>.
+    /// </summary>
+    [Fact]
+    public void ArticleProfile_Check_User_Correct()
+    {
+        // Arrange
+        var userName = "Петя";
+
+        var source = Fixture
+            .Build<CreateArticleDto>()
+            .OmitAutoProperties()
+            .With(x => x.UserName, userName)
+            .Create();
+
+        // Act
+        var result = Mapper.Map<CreateArticleDto, User>(source);
+
+        // Assert
+        result.Should().NotBeNull();
+        result.ShouldBeOfType<User>();
+        result.Id.Should().Be(Guid.Empty);
+        result.Name.Should().Be("Петр");
     }
 }
