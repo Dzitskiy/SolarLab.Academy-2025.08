@@ -10,8 +10,11 @@ public class CreateArticleValidator : AbstractValidator<CreateArticleDto>
 {
     public CreateArticleValidator()
     {
-        RuleFor(x => x.Title).NotNull().NotEmpty().WithMessage("Не указан заголовок.");
-        RuleFor(x => x.Title).Length(3, 50).WithMessage("Заголовок должен иметь длину от 3 до 50.");
+        RuleFor(x => x.Title)
+            .NotEmpty()
+            .WithMessage("Не указан заголовок.")
+            .Length(3, 50)
+            .WithMessage("Заголовок должен иметь длину от 3 до 50.");
 
         RuleFor(x => x.Description).NotNull().NotEmpty().WithMessage("Не указано описание.");
         RuleFor(x => x.Description).Length(10, 200).WithMessage("Описание должно иметь длину от 10 до 200.");

@@ -64,8 +64,34 @@ public class CreateArticleValidatorTests
 
         // Assert
         result.IsValid.Should().BeFalse();
-        result.Errors.Should().HaveCount(2);
+        result.Errors.Should().HaveCount(1);
         result.Errors.Should().Contain(x => x.ErrorMessage == "Не указан заголовок.");
+    }
+
+    /// <summary>
+    /// Проверяем, при невалидной модели должна быть ошибка
+    /// </summary>
+    [Theory]
+    [InlineData("12")]
+    [InlineData("123456789012345678901234567890123456789012345678901")]
+    public void ValidDto_FailureTitle(string title)
+    {
+        // Arrange
+        var dto = _fixture
+            .Build<CreateArticleDto>()
+            .With(x => x.Title, title)
+            .With(x => x.Description, "Description")
+            .With(x => x.UserName, "UserName")
+            .With(x => x.CreatedAt, DateTime.Now)
+            .Create();
+
+        // Act
+        var result = _validator.Validate(dto);
+
+        // Assert
+        result.IsValid.Should().BeFalse();
+        result.Errors.Should().HaveCount(1);
+        result.Errors.Should().Contain(x => x.ErrorMessage == "Заголовок должен иметь длину от 3 до 50.");
     }
 
     /// <summary>
