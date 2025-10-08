@@ -20,6 +20,21 @@ builder.Services.AddFluentValidation();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//builder.Services.AddResponseCaching();
+
+builder.Services.AddMemoryCache(options => 
+{
+    options.SizeLimit = 1024;
+});
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddStackExchangeRedisCache(options =>
+{ 
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+
+});
+
+
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -30,6 +45,19 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
     app.UseSwaggerUI();
 
 //}
+
+//app.UseResponseCaching();
+
+//app.Use(async (conext, next) =>
+//{ 
+//    conext.Response.GetTypedHeaders().CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
+//    {
+//        //Private = false,
+//        Public = true,
+//        MaxAge = TimeSpan.FromSeconds(10)
+//    };
+//await next();
+//});
 
 app.UseAuthorization();
 
