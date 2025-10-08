@@ -27,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Articles\Application\Articles.AppServices\Articles.AppServices.csproj" />
     <ProjectReference Include="..\..\src\Articles\Infrastructure\Articles.Infrastructure.ComponentRegistrar\Articles.Infrastructure.ComponentRegistrar.csproj" />
   </ItemGroup>
 
