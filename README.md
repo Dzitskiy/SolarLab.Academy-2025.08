@@ -2,3 +2,4 @@
 Академия SolarLab 2025 Backend - Demo-проект
 
 
+
