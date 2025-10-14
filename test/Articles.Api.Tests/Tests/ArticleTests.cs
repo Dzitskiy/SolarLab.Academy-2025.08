@@ -1,4 +1,4 @@
-using System.Net;
+п»їusing System.Net;
 using System.Net.Http.Json;
 using Articles.Api.Tests.Stubs;
 using Articles.Contracts.Articles;
@@ -10,7 +10,7 @@ namespace Articles.Api.Tests.Tests;
 public class ArticleTests(TestWebAppFactory app) : IClassFixture<TestWebAppFactory>
 {
     /// <summary>
-    /// GET Articles должен вернуть статью по существующему идентификатору.
+    /// GET Articles РґРѕР»Р¶РµРЅ РІРµСЂРЅСѓС‚СЊ СЃС‚Р°С‚СЊСЋ РїРѕ СЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРјСѓ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂСѓ.
     /// </summary>
     /// <returns></returns>
     [Fact]
@@ -33,7 +33,7 @@ public class ArticleTests(TestWebAppFactory app) : IClassFixture<TestWebAppFacto
     }
 
     /// <summary>
-    /// GET Articles должен вернуть 404 по несуществующему идентификатору.
+    /// GET Articles РґРѕР»Р¶РµРЅ РІРµСЂРЅСѓС‚СЊ 404 РїРѕ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРјСѓ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂСѓ.
     /// </summary>
     /// <returns></returns>
     [Fact]
@@ -50,6 +50,6 @@ public class ArticleTests(TestWebAppFactory app) : IClassFixture<TestWebAppFacto
         // assert
         response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
         dto.ShouldNotBeNull();
-        dto.Message.ShouldBe($"Сущность с идентификатором {id} не была найдена.");
+        dto.Message.ShouldBe($"РЎСѓС‰РЅРѕСЃС‚СЊ СЃ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂРѕРј {id} РЅРµ Р±С‹Р»Р° РЅР°Р№РґРµРЅР°.");
     }
 }
