@@ -26,7 +26,7 @@ public class ExceptionHandlingMiddleware
         }
         catch (Exception e)
         {
-            using (_logger.BeginScope(new Dictionary<string, object> { ["UserIp"] = context.Connection.RemoteIpAddress.ToString() }))
+            using (_logger.BeginScope(new Dictionary<string, object> { ["UserIp"] = context.Connection.RemoteIpAddress?.ToString() ?? "unknown" }))
             {
                 _logger.LogError(e, "Что-то пошло не так");
             }
